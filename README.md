@@ -23,4 +23,4 @@ Collection of Posix tools wrappers.
 
 ## Notes
 
-Thanks [SoSplush](sosplush.com) ([@SoSplush](https://twitter.com/SoSplush)) for the Tux design.
+Thanks [SoSplush](https://sosplush.com/) ([@SoSplush](https://twitter.com/SoSplush)) for the Tux design.
