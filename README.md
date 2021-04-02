@@ -20,3 +20,7 @@ Collection of Posix tools wrappers.
 - `Get-nxKernelInfo`: A simple wrapper around `uname -a`.
 - `Compare-nxFileSystemPermission`: An easy way to compare two sets of unix file system permissions.  
     You can use a Symbolic notation (`rwxrwxrwx`), or the numericla permission (`777` or `0777`).
+
+## Notes
+
+Thanks [SoSplush](sosplush.com) ([@SoSplush](https://twitter.com/SoSplush)) for the Tux design.
