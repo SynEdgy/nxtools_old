@@ -1,4 +1,4 @@
-# Localized strings for nxTools module.
+# Localized strings for nxtools module.
 
 ConvertFrom-StringData @'
 
