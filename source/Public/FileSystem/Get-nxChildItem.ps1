@@ -4,9 +4,9 @@ function Get-nxChildItem
     [OutputType([nxFileSystemInfo[]])]
     param
     (
-        [Parameter(ParameterSetName = 'default'         , Position = 0, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
-        [Parameter(ParameterSetName = 'FilterDirectory' , Position = 0, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
-        [Parameter(ParameterSetName = 'FilterFile'      , Position = 0, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(ParameterSetName = 'default'         , Position = 0, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, Position = 0)]
+        [Parameter(ParameterSetName = 'FilterDirectory' , Position = 0, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, Position = 0)]
+        [Parameter(ParameterSetName = 'FilterFile'      , Position = 0, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, Position = 0)]
         [System.String[]]
         $Path = '.',
 

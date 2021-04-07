@@ -72,6 +72,9 @@ Set-nxMode -Path /tmp/tmpjBneMD.tmp -Mode 'rwxr--r--' -Recurse -WhatIf  # chmod 
 Set-nxMode -Path /tmp/tmpjBneMD.tmp -Mode '0744' -Recurse -WhatIf       # chmod -R 0744
 Set-nxMode -Path /tmp/tmpjBneMD.tmp -Mode 744 -Recurse -Whatif          # chmod -R 0744
 
+# Get the other groups the members of the tape group are member of
+Get-nxLocalGroup tape | Get-nxLocalUser | Get-nxLocalUserMemberOf
+
 Set-nxOwner -Path /tmp/tmpjBneMD.tmp  -Owner (whoami) # chown gcolas /tmp/tmpjBnedMD.tmp
 
 Set-nxGroupOwnership -Path /tmp/testdir -Recurse -Group users -RecursivelyTraverseSymLink
