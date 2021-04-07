@@ -1,4 +1,4 @@
-function Set-nxOwner
+function Set-nxGroupOwnership
 {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium', DefaultParameterSetName = 'Default')]
     [OutputType([void])]
@@ -10,17 +10,9 @@ function Set-nxOwner
         [System.String[]]
         $Path,
 
-        [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, ParameterSetName = 'Default')]
-        [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, ParameterSetName = 'RecursiveAll')]
-        [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, ParameterSetName = 'RecursivePath')]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        [Alias('UserName')]
-        $Owner,
-
-        [Parameter(ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, ParameterSetName = 'Default')]
-        [Parameter(ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, ParameterSetName = 'RecursiveAll')]
-        [Parameter(ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, ParameterSetName = 'RecursivePath')]
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true, ParameterSetName = 'Default')]
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true, ParameterSetName = 'RecursiveAll')]
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true, ParameterSetName = 'RecursivePath')]
         [ValidateNotNullOrEmpty()]
         [string]
         $Group,
@@ -60,53 +52,52 @@ function Set-nxOwner
         $Force
     )
 
+    begin {
+        $verbose = ($PSBoundParameters.ContainsKey('Verbose') -and $PSBoundParameters.Verbose) -or $VerbosePreference -ne 'SilentlyContinue'
+    }
+
     process {
         foreach ($pathItem in $Path)
         {
             $pathItem = [System.Io.Path]::GetFullPath($pathItem, $PWD.Path)
 
-            $chownParams = @()
+            $chgrpParams = @()
 
             if ($PSBoundParameters.ContainsKey('NoDereference') -and $PSBoundParameters['NoDereference'])
             {
-                $chownParams += '-h'
+                $chgrpParams += '-h'
             }
 
             if ($PSBoundParameters.ContainsKey('RecursivelyTraverseSymLink') -and $PSBoundParameters['RecursivelyTraverseSymLink'])
             {
-                $chownParams += '-L'
+                $chgrpParams += '-L'
             }
 
             if ($PSBoundParameters.ContainsKey('OnlyTraversePathIfSymLink') -and $PSBoundParameters['OnlyTraversePathIfSymLink'])
             {
-                $chownParams += '-H'
+                $chgrpParams += '-H'
             }
 
             if ($PSBoundParameters.ContainsKey('Recurse') -and $PSBoundParameters['Recurse'])
             {
-                $chownParams += '-R'
+                $chgrpParams += '-R'
             }
 
-            if ($PSBoundParameters.ContainsKey('Group'))
-            {
-                $Owner = '{0}:{1}' -f $Owner,$Group
-            }
-
-            $chownParams = ($chownParams + @($Owner, $pathItem))
+            $chgrpParams = ($chgrpParams + @($Group, $pathItem))
 
             if (
-                $PSCmdlet.ShouldProcess("Performing the unix command 'chown $($chownParams -join ' ')'.", $PathItem, "chown $($chownParams -join ' ')")
+                $PSCmdlet.ShouldProcess("Performing the unix command 'chgrp $($chgrpParams -join ' ')'.", $PathItem, "chgrp $($chgrpParams -join ' ')")
             )
             {
                 if ($pathItem -eq '/' -and -not ($PSBoundParameters.ContainsKey('Force') -and $Force))
                 {
                     # can't use the built-in --preserve-root because it's not available on Alpine linux
-                    Write-Warning "You are about to chown your root. Please use -Force."
+                    Write-Warning "You are about to chgrp your root. Please use -Force."
                     return
                 }
 
-                Write-Verbose -Message ('chown {0}' -f ($chownParams -join ' '))
-                Invoke-NativeCommand -Executable 'chown' -Parameters $chownParams | Foreach-Object -Process {
+                Write-Verbose -Message ('chgrp {0}' -f ($chgrpParams -join ' '))
+                Invoke-NativeCommand -Executable 'chgrp' -Parameters $chgrpParams -Verbose:$verbose | Foreach-Object -Process {
                     Write-Error -Message $_
                 }
             }

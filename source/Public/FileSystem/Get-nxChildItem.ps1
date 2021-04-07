@@ -27,6 +27,8 @@ function Get-nxChildItem
 
     begin
     {
+        $verbose   = ($PSBoundParameters.ContainsKey('Verbose') -and $PSBoundParameters.Verbose) -or $VerbosePreference -ne 'SilentlyContinue'
+        $debug     = ($PSBoundParameters.ContainsKey('Debug') -and $PSBoundParameters['Debug']) -or $DebugPreference -ne 'SilentlyContinue'
         $lsParams  = @('-Al','--full-time','--group-directories-first')
 
         if ($PSBoundParameters.ContainsKey('Recurse') -and $PSboundParameters['Recurse'])
@@ -41,7 +43,8 @@ function Get-nxChildItem
         {
             $pathItem = [System.IO.Path]::GetFullPath($pathItem, $PWD.Path)
             $unfilteredListCommand = {
-                Invoke-NativeCommand -Executable 'ls' -Parameters ($lsParams + @($pathItem)) | Convert-nxLsEntryToFileSystemInfo -InitialPath $pathItem
+                Invoke-NativeCommand -Executable 'ls' -Parameters ($lsParams + @($pathItem)) -Verbose:($verbose -or $debug) |
+                    Convert-nxLsEntryToFileSystemInfo -InitialPath $pathItem -Verbose:$debug
             }
 
             if ($PSCmdlet.ParameterSetName -eq 'FilterFile' -and $PSBoundParameters['File'])

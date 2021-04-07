@@ -1,4 +1,4 @@
-function Set-nxMode
+function Set-nxOwner
 {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium', DefaultParameterSetName = 'Default')]
     [OutputType([void])]
@@ -10,11 +10,20 @@ function Set-nxMode
         [System.String[]]
         $Path,
 
-        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true, ParameterSetName = 'Default')]
-        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true, ParameterSetName = 'RecursiveAll')]
-        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true, ParameterSetName = 'RecursivePath')]
-        [nxFileSystemMode]
-        $Mode,
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, ParameterSetName = 'Default')]
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, ParameterSetName = 'RecursiveAll')]
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, ParameterSetName = 'RecursivePath')]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        [Alias('UserName')]
+        $Owner,
+
+        [Parameter(ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, ParameterSetName = 'Default')]
+        [Parameter(ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, ParameterSetName = 'RecursiveAll')]
+        [Parameter(ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, ParameterSetName = 'RecursivePath')]
+        [ValidateNotNullOrEmpty()]
+        [string]
+        $Group,
 
         [Parameter(ValueFromPipelineByPropertyName = $true, ParameterSetName = 'Default')]
         [Parameter(ValueFromPipelineByPropertyName = $true, ParameterSetName = 'RecursiveAll')]
@@ -51,51 +60,57 @@ function Set-nxMode
         $Force
     )
 
+    begin {
+        $verbose = ($PSBoundParameters.ContainsKey('Verbose') -and $PSBoundParameters.Verbose) -or $VerbosePreference -ne 'SilentlyContinue'
+    }
+
     process {
         foreach ($pathItem in $Path)
         {
             $pathItem = [System.Io.Path]::GetFullPath($pathItem, $PWD.Path)
 
-            $chmodParams = @()
+            $chownParams = @()
 
             if ($PSBoundParameters.ContainsKey('NoDereference') -and $PSBoundParameters['NoDereference'])
             {
-                $chmodParams += '-h'
+                $chownParams += '-h'
             }
 
             if ($PSBoundParameters.ContainsKey('RecursivelyTraverseSymLink') -and $PSBoundParameters['RecursivelyTraverseSymLink'])
             {
-                $chmodParams += '-L'
+                $chownParams += '-L'
             }
 
             if ($PSBoundParameters.ContainsKey('OnlyTraversePathIfSymLink') -and $PSBoundParameters['OnlyTraversePathIfSymLink'])
             {
-                $chmodParams += '-H'
+                $chownParams += '-H'
             }
 
             if ($PSBoundParameters.ContainsKey('Recurse') -and $PSBoundParameters['Recurse'])
             {
-                $chmodParams += '-R'
+                $chownParams += '-R'
             }
 
-            $OctalMode = $Mode.ToOctal()
-            $chmodParams = ($chmodParams + @($OctalMode, $pathItem))
+            if ($PSBoundParameters.ContainsKey('Group'))
+            {
+                $Owner = '{0}:{1}' -f $Owner,$Group
+            }
 
-            Write-Debug "Parameter Set Name: '$($PSCmdlet.ParameterSetName)'."
+            $chownParams = ($chownParams + @($Owner, $pathItem))
 
             if (
-                $PSCmdlet.ShouldProcess("Performing the unix command 'chmod $($chmodParams -join ' ')'.", $PathItem, "chmod $($chmodParams -join ' ')")
+                $PSCmdlet.ShouldProcess("Performing the unix command 'chown $($chownParams -join ' ')'.", $PathItem, "chown $($chownParams -join ' ')")
             )
             {
                 if ($pathItem -eq '/' -and -not ($PSBoundParameters.ContainsKey('Force') -and $Force))
                 {
                     # can't use the built-in --preserve-root because it's not available on Alpine linux
-                    Write-Warning "You are about to chmod your root. Please use -Force."
+                    Write-Warning "You are about to chown your root. Please use -Force."
                     return
                 }
 
-                Write-Verbose -Message ('chmod {0}' -f ($chmodParams -join ' '))
-                Invoke-NativeCommand -Executable 'chmod' -Parameters $chmodParams  | Foreach-Object -Process {
+                Write-Verbose -Message ('chown {0}' -f ($chownParams -join ' '))
+                Invoke-NativeCommand -Executable 'chown' -Parameters $chownParams -Verbose:$verbose | Foreach-Object -Process {
                     Write-Error -Message $_
                 }
             }

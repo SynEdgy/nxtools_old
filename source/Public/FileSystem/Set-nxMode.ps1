@@ -1,4 +1,4 @@
-function Set-nxGroupOwnership
+function Set-nxMode
 {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium', DefaultParameterSetName = 'Default')]
     [OutputType([void])]
@@ -13,9 +13,8 @@ function Set-nxGroupOwnership
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true, ParameterSetName = 'Default')]
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true, ParameterSetName = 'RecursiveAll')]
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true, ParameterSetName = 'RecursivePath')]
-        [ValidateNotNullOrEmpty()]
-        [string]
-        $Group,
+        [nxFileSystemMode]
+        $Mode,
 
         [Parameter(ValueFromPipelineByPropertyName = $true, ParameterSetName = 'Default')]
         [Parameter(ValueFromPipelineByPropertyName = $true, ParameterSetName = 'RecursiveAll')]
@@ -52,48 +51,55 @@ function Set-nxGroupOwnership
         $Force
     )
 
+    begin {
+        $verbose = ($PSBoundParameters.ContainsKey('Verbose') -and $PSBoundParameters.Verbose) -or $VerbosePreference -ne 'SilentlyContinue'
+    }
+
     process {
         foreach ($pathItem in $Path)
         {
             $pathItem = [System.Io.Path]::GetFullPath($pathItem, $PWD.Path)
 
-            $chgrpParams = @()
+            $chmodParams = @()
 
             if ($PSBoundParameters.ContainsKey('NoDereference') -and $PSBoundParameters['NoDereference'])
             {
-                $chgrpParams += '-h'
+                $chmodParams += '-h'
             }
 
             if ($PSBoundParameters.ContainsKey('RecursivelyTraverseSymLink') -and $PSBoundParameters['RecursivelyTraverseSymLink'])
             {
-                $chgrpParams += '-L'
+                $chmodParams += '-L'
             }
 
             if ($PSBoundParameters.ContainsKey('OnlyTraversePathIfSymLink') -and $PSBoundParameters['OnlyTraversePathIfSymLink'])
             {
-                $chgrpParams += '-H'
+                $chmodParams += '-H'
             }
 
             if ($PSBoundParameters.ContainsKey('Recurse') -and $PSBoundParameters['Recurse'])
             {
-                $chgrpParams += '-R'
+                $chmodParams += '-R'
             }
 
-            $chgrpParams = ($chgrpParams + @($Group, $pathItem))
+            $OctalMode = $Mode.ToOctal()
+            $chmodParams = ($chmodParams + @($OctalMode, $pathItem))
+
+            Write-Debug "Parameter Set Name: '$($PSCmdlet.ParameterSetName)'."
 
             if (
-                $PSCmdlet.ShouldProcess("Performing the unix command 'chgrp $($chgrpParams -join ' ')'.", $PathItem, "chgrp $($chgrpParams -join ' ')")
+                $PSCmdlet.ShouldProcess("Performing the unix command 'chmod $($chmodParams -join ' ')'.", $PathItem, "chmod $($chmodParams -join ' ')")
             )
             {
                 if ($pathItem -eq '/' -and -not ($PSBoundParameters.ContainsKey('Force') -and $Force))
                 {
                     # can't use the built-in --preserve-root because it's not available on Alpine linux
-                    Write-Warning "You are about to chgrp your root. Please use -Force."
+                    Write-Warning "You are about to chmod your root. Please use -Force."
                     return
                 }
 
-                Write-Verbose -Message ('chgrp {0}' -f ($chgrpParams -join ' '))
-                Invoke-NativeCommand -Executable 'chgrp' -Parameters $chgrpParams | Foreach-Object -Process {
+                Write-Verbose -Message ('chmod {0}' -f ($chmodParams -join ' '))
+                Invoke-NativeCommand -Executable 'chmod' -Parameters $chmodParams -Verbose:$verbose  | Foreach-Object -Process {
                     Write-Error -Message $_
                 }
             }

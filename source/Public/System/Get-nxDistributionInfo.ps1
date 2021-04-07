@@ -8,7 +8,9 @@ function Get-nxDistributionInfo
         $InfoFilePath = '/etc/*-release'
     )
 
-    $InfoFilePath = [string[]](Get-Item $InfoFilePath -ErrorAction Stop)
+    $verbose = ($PSBoundParameters.ContainsKey('Verbose') -and $PSBoundParameters.Verbose) -or $VerbosePreference -ne 'SilentlyContinue'
+
+    $InfoFilePath = [string[]](Get-Item $InfoFilePath -ErrorAction Stop -Verbose:$Verbose)
     Write-Verbose -Message "Extracting distro info from '$($InfoFilePath -join "', '")'"
 
     $properties = Get-Content -Path $InfoFilePath |

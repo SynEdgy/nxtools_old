@@ -8,14 +8,7 @@ function Get-nxLinuxStandardBaseRelease
     (
     )
 
-    if ($PSBoundParameters.Verbose -or $VerbosePreference -ne 'SilentlyContinue')
-    {
-        $Verbose = $true
-    }
-    else
-    {
-        $Verbose = $false
-    }
+    $verbose = ($PSBoundParameters.ContainsKey('Verbose') -and $PSBoundParameters.Verbose) -or $VerbosePreference -ne 'SilentlyContinue'
 
     $properties = Invoke-NativeCommand -Executable 'lsb_release' -Parameters '--all' -Verbose:$Verbose |
         Get-PropertyHashFromListOutput -ErrorHandling {
