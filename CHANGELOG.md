@@ -29,10 +29,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `Remove-nxLocalUser`: Delete a Local user using `userdel`.
     - `Remove-nxLocalGroupMember`: Removes a user from a local group using `gpasswd`.
     - `Remove-nxLocalGroup`: Deletes a local group using `groupdel`.
+    - `Get-nxEtcShadow`: Gets a user's `/etc/shadow` entry if it exists.
+    - `Disable-nxLocalUser`: Lock a user's password, Expire its account and replace its Shell to `/sbin/nologin`.
 
 - Supporting Enums and Classes for File System permissions.
     - In order to make interpretation, Comparison, and manipulation of File system permissions easier,
       the module implements a few classes and enum to make that work.
+
+- DscResource:
+    - `nxUser`: Simple resource to manage [nxLocalUser] accounts.
 
 ### Changed
 

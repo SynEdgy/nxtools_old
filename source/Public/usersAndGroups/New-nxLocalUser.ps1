@@ -162,11 +162,13 @@ function New-nxLocalUser
         $PassThru
     )
 
-    begin {
+    begin
+    {
         $verbose = ($PSBoundParameters.ContainsKey('Verbose') -and $PSBoundParameters['Verbose']) -or $VerbosePreference -ne 'SilentlyContinue'
     }
 
-    process {
+    process
+    {
         if ([nxLocalUser]::Exists($UserName))
         {
             throw ("A user account for '{0}' is already present." -f $UserName)
