@@ -29,7 +29,7 @@ class nxUser
     [string] $HomeDirectory
 
     [DscProperty()]
-    [System.Nullable[int]] $GroupID
+    [string] $GroupID
 
     [DscProperty(NotConfigurable)]
     [Reason[]] $Reasons
@@ -55,21 +55,30 @@ class nxUser
             $currentState.Description   = $nxLocalUser.Description
             $currentState.Password      = $nxLocalUser.EtcShadow.EncryptedPassword
             $currentState.Disabled      = $nxLocalUser.isDisabled()
-            $currentState.PasswordChangeRequired = $nxLocalUser
+            # $currentState.PasswordChangeRequired --> this is a WriteNoRead
             $currentState.HomeDirectory = $nxLocalUser.HomeDirectory
-            $currentState.GroupID       = $nxLocalUser.GroupID
+
+            # get the current primary group as an ID or a string based on what is Desired
+            if ($this.GroupID -as [int])
+            {
+                $currentState.GroupId = $nxLocalUser.GroupID
+            }
+            else
+            {
+                # Expected GroupID is a string, resolve the Current GroupId's name.
+                $currentState.GroupId = (Get-nxLocalGroup).Where({ $_.GroupID -eq $nxLocalUser.GroupID }).GroupName | Select-Object -First 1
+            }
 
             $valuesToCheck = @(
-                # UserName can be skipped because determines Ensure absent/present
+                # UserName can be skipped because it's determined with Ensure absent/present
                 'Ensure'
                 'FullName'
                 'Description'
                 'Password'
                 'Disabled'
-                'PasswordChangeRequired'
                 'HomeDirectory'
                 'GroupID'
-            ).Where({$null -ne $this.$_}) #remove properties not set from comparison
+            ).Where({ $null -ne $this.$_ }) #remove properties not set from comparison
 
             $compareStateParams = @{
                 CurrentValues = ($currentState | Convert-ObjectToHashtable)
@@ -77,7 +86,7 @@ class nxUser
                 ValuesToCheck = $valuesToCheck
             }
 
-            $compareState = Compare-DscParameterState @compareStateParams | Where-Object {$_.InDesiredState -eq $false }
+            $compareState = Compare-DscParameterState @compareStateParams
 
             $currentState.reasons = switch ($compareState.Property)
             {
@@ -149,6 +158,7 @@ class nxUser
         else
         {
             $currentState.Ensure = [Ensure]::Absent
+            $currentState.UserName = $this.UserName
             Write-Verbose -Message ($script:localizedDataNxUser.nxLocalUserNotFound -f $this.UserName)
             if ($this.Ensure -ne $currentState.Ensure)
             {
@@ -156,6 +166,10 @@ class nxUser
                     Code = '{0}:{1}:Ensure' -f $this.GetType(), $this.UserName
                     Phrase = $script:localizedDataNxUser.nxLocalUserNotFound -f $this.UserName
                 }
+            }
+            else
+            {
+                Write-Verbose -Message ('The user ''{0}'' is in the desired state' -f $this.UserName)
             }
         }
 
@@ -166,26 +180,112 @@ class nxUser
     {
         $currentState = $this.Get()
 
-        if ($this.Ensure -eq [Ensure]::Present)
+        if ($this.Ensure -eq [Ensure]::Present) # must be present
         {
-            if ($currentState.Ensure -eq [Ensure]::Absent)
+            if ($currentState.Ensure -eq [Ensure]::Absent) # but is absent
             {
                 Write-Verbose -Message (
                     $script:localizedDataNxUser.CreateUser -f $this.UserName
                 )
 
-                # New User
+                $newNxLocalUserParam = @{
+                    Username    = $this.UserName
+                    Passthru    = $true
+                    ErrorAction = 'Stop'
+                    Confirm     = $false
+                }
+
+                if ($this.GroupID)
+                {
+                    $newNxLocalUserParam.Add(
+                        'PrimaryGroup', $this.GroupID
+                    )
+                }
+
+                if ($this.Password)
+                {
+                    $newNxLocalUserParam.Add(
+                        'EncryptedPassword', $this.Password
+                    )
+                }
+
+                if ($this.HomeDirectory)
+                {
+                    $newNxLocalUserParam.Add(
+                        'HomeDirectory', $this.HomeDirectory
+                    )
+                }
+
+                if ($this.FullName -or $this.Description)
+                {
+                    $newNxLocalUserParam.Add(
+                        'UserInfo',
+                        ('{0},,,,{1},' -f $this.FullName, $this.Description)
+                    )
+                }
+
+                if ($this.PasswordChangeRequired)
+                {
+                    # Make it expired yesterday
+                    $newNxLocalUserParam.Add(
+                        'ExpireOn',
+                        (Get-Date).AddDays(-1)
+                    )
+                }
+
+                $localUser = New-nxLocalUser @newNxLocalUserParam
             }
             else
             {
+                # The user exists but has some non-compliant settings (found in the reasons)
+
                 # Get user so we can set other properties
+                $localUser = Get-nxLocalUser -UserName $this.UserName -ErrorAction Stop
+
+                switch -Regex ($currentState.Reasons.Code)
+                {
+                    ':FullName$'
+                    {
+
+                    }
+
+                    ':Description$'
+                    {
+
+                    }
+
+                    ':Password$'
+                    {
+
+                    }
+
+                    ':Disabled$'
+                    {
+
+                    }
+
+                    ':HomeDirectory$'
+                    {
+
+                    }
+
+                    ':GroupID$'
+                    {
+                        Write-Verbose -Message ('Forcing the PrimaryGroup to be ID {0}' -f  $this.GroupID)
+                    }
+                }
+            }
+
+            # Set other properties if needed
+            if ($this.Disabled -and -not $localUser.IsDisabled())
+            {
+                Write-Verbose -Message "Disabling user account '$($this.UserName)'."
+                Disable-nxLocalUser -UserName $localUser.UserName
             }
 
             Write-Verbose -Message (
                 $script:localizedDataNxUser.SettingProperties -f $this.UserName
             )
-
-            # Set other properties if needed
         }
         else
         {
@@ -194,33 +294,18 @@ class nxUser
             {
                 # But it does, remove it
                 Write-Verbose -Message (
-                    $script:localizedDataNxUser.RemoveFolder -f $this.Path
+                    $script:localizedDataNxUser.RemoveNxLocalUser -f $this.Path
                 )
 
-                Remove-nxLocalUser -UserName $this.Username
+                Remove-nxLocalUser -UserName $this.Username -Confirm:$false
             }
         }
     }
 
     [bool] Test()
     {
-        $testTargetResourceResult = $false
         $currentState = $this.Get()
-
-        if ($this.Ensure -eq [Ensure]::Present)
-        {
-            # if $this should exist, make sure there's no reason of non-compliance
-            Write-Verbose -Message $script:localizedDataNxUser.EvaluateProperties
-
-            $testTargetResourceResult = $currentState.Reasons.count -eq 0
-        }
-        else
-        {
-            if ($this.Ensure -eq $currentState.Ensure)
-            {
-                $testTargetResourceResult = $true
-            }
-        }
+        $testTargetResourceResult = $currentState.Reasons.count -eq 0
 
         return $testTargetResourceResult
     }

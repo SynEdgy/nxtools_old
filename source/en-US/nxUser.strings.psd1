@@ -19,4 +19,5 @@ ConvertFrom-StringData @'
     CreateUser = dummy
     SettingProperties = dummy
     EvaluateProperties = dummy
+    RemoveNxLocalUser = dummy
 '@
