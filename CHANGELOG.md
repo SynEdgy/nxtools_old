@@ -22,12 +22,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `Set-nxGroupOwnership`: Set the group owning the files and folders using `chgrp`.
     - `Get-nxLocalUserMemberOf`: Get the groups (`[nxLocalGroup[]]`) a Local user is member of.
     - `New-nxLocalUser`: Creates a new Local User using `useradd`.
-    - `Add-nxLocalGroupMember`: Add a user to a group using `useradd`.
+    - `Add-nxLocalGroupMember`: Add users to a group using `gpasswd`.
+    - `Add-nxLocalUserToGroup`: Add user to groups using `usermod`.
     - `New-nxLocalGroup`: Create a new Local Group using `groupadd`.
     - `Set-nxLocalGroup`: Set the properties of an existing local group using `gpasswd`.
     - `Set-nxLocalGroupMember`: Set (and replace) the members of an existing group using `gpasswd`.
     - `Remove-nxLocalUser`: Delete a Local user using `userdel`.
-    - `Remove-nxLocalGroupMember`: Removes a user from a local group using `gpasswd`.
+    - `Remove-nxLocalGroupMember`: Removes users from a local group using `gpasswd`.
     - `Remove-nxLocalGroup`: Deletes a local group using `groupdel`.
     - `Get-nxEtcShadow`: Gets a user's `/etc/shadow` entry if it exists.
     - `Disable-nxLocalUser`: Lock a user's password, Expire its account and replace its Shell to `/sbin/nologin`.
@@ -38,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - DscResource:
     - `nxUser`: Simple resource to manage [nxLocalUser] accounts.
+    - `nxGroup`: Simple resource to manage [nxLocalGroup] and group members.
 
 ### Changed
 
