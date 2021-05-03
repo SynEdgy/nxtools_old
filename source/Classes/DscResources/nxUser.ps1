@@ -47,8 +47,6 @@ class nxUser
         {
             Write-Verbose -Message ($script:localizedDataNxUser.nxUserFound -f $this.UserName)
 
-            # Cast the object to Boolean.
-
             $currentState.Ensure        = [Ensure]::Present
             $currentState.UserName      = $nxLocalUser.UserName
             $currentState.FullName      = $nxLocalUser.FullName
@@ -93,7 +91,7 @@ class nxUser
                 'Ensure'
                 {
                     [Reason]@{
-                        Code = '{0}:{1}:Ensure' -f $this.GetType(), $this.UserName
+                        Code = '{0}:{0}:Ensure' -f $this.GetType()
                         Phrase = $script:localizedDataNxUser.nxLocalUserShouldBeAbsent -f $this.UserName
                     }
                 }
@@ -101,7 +99,7 @@ class nxUser
                 'FullName'
                 {
                     [Reason]@{
-                        Code = '{0}:{1}:FullName' -f $this.GetType(), $this.UserName
+                        Code = '{0}:{0}:FullName' -f $this.GetType()
                         Phrase = $script:localizedDataNxUser.FullNameMismatch -f $this.FullName, $currentState.FullName
                     }
                 }
@@ -109,7 +107,7 @@ class nxUser
                 'Description'
                 {
                     [Reason]@{
-                        Code = '{0}:{1}:Description' -f $this.GetType(), $this.UserName
+                        Code = '{0}:{0}:Description' -f $this.GetType()
                         Phrase = $script:localizedDataNxUser.DescriptionMismatch -f $this.Description, $currentState.Description
                     }
                 }
@@ -117,7 +115,7 @@ class nxUser
                 'Password'
                 {
                     [Reason]@{
-                        Code = '{0}:{1}:Password' -f $this.GetType(), $this.UserName
+                        Code = '{0}:{0}:Password' -f $this.GetType()
                         Phrase = $script:localizedDataNxUser.PasswordMismatch -f $this.Password, $currentState.Password
                     }
                 }
@@ -125,7 +123,7 @@ class nxUser
                 'Disabled'
                 {
                     [Reason]@{
-                        Code = '{0}:{1}:Disabled' -f $this.GetType(), $this.UserName
+                        Code = '{0}:{0}:Disabled' -f $this.GetType()
                         Phrase = $script:localizedDataNxUser.DisabledMismatch -f $this.Disabled, $currentState.Disabled
                     }
                 }
@@ -133,7 +131,7 @@ class nxUser
                 'PasswordChangeRequired'
                 {
                     [Reason]@{
-                        Code = '{0}:{1}:PasswordChangeRequired' -f $this.GetType(), $this.UserName
+                        Code = '{0}:{0}:PasswordChangeRequired' -f $this.GetType()
                         Phrase = $script:localizedDataNxUser.PasswordChangeRequiredMismatch -f $this.PasswordChangeRequired, $currentState.PasswordChangeRequired
                     }
                 }
@@ -141,7 +139,7 @@ class nxUser
                 'HomeDirectory'
                 {
                     [Reason]@{
-                        Code = '{0}:{1}:HomeDirectory' -f $this.GetType(), $this.UserName
+                        Code = '{0}:{0}:HomeDirectory' -f $this.GetType()
                         Phrase = $script:localizedDataNxUser.HomeDirectoryMismatch -f $this.HomeDirectory, $currentState.HomeDirectory
                     }
                 }
@@ -149,7 +147,7 @@ class nxUser
                 'GroupID'
                 {
                     [Reason]@{
-                        Code = '{0}:{1}:GroupID' -f $this.GetType(), $this.UserName
+                        Code = '{0}:{0}:GroupID' -f $this.GetType()
                         Phrase = $script:localizedDataNxUser.GroupIDMismatch -f $this.GroupID, $currentState.GroupID
                     }
                 }
@@ -163,7 +161,7 @@ class nxUser
             if ($this.Ensure -ne $currentState.Ensure)
             {
                 $currentState.reasons = [Reason]@{
-                    Code = '{0}:{1}:Ensure' -f $this.GetType(), $this.UserName
+                    Code = '{0}:{0}:Ensure' -f $this.GetType()
                     Phrase = $script:localizedDataNxUser.nxLocalUserNotFound -f $this.UserName
                 }
             }
