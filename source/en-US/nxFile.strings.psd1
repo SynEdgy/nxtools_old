@@ -22,5 +22,6 @@ ConvertFrom-StringData @'
     SetFileContent = Setting file content for '{0}'.
     CopySourceToDestination = Copying Source file '{0}' to Destination '{1}'.
     GetFileContent = Getting the raw content of '{0}'.
-    CompareCtime = Comparing current item '{0}' 's ctime of '{1}' against the source '{2}'.
+    CompareCtime = Comparing current item '{0}' ctime of '{1}' against the source '{2}'.
+    CompareMtime = Comparing current item '{0}' mtime of '{1}' against the source '{2}'.
 '@
