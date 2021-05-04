@@ -40,6 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - DscResource:
     - `nxUser`: Simple resource to manage [nxLocalUser] accounts.
     - `nxGroup`: Simple resource to manage [nxLocalGroup] and group members.
+    - `nxFile`: Simple resource to manage [nxItem] (file or directory).
 
 ### Changed
 

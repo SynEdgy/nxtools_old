@@ -203,7 +203,7 @@ class nxGroup
                     }
                 }
             }
-            else
+            elseif ($this.Reasons.Count -gt 0)
             {
                 $nxLocalGroup = Get-nxLocalGroup -GroupName $this.GroupName
                 # The Group exists but is not set properly
@@ -239,6 +239,10 @@ class nxGroup
                         }
                     }
                 }
+            }
+            else
+            {
+                # Set() invoked but no change needed.
             }
         }
         else
