@@ -47,6 +47,10 @@ BuildWorkflow:
     - Build_NestedModules_ModuleBuilder
     - Create_changelog_release_output
 
+  gcpol:
+    - Clean
+    - build
+    - build_guestconfiguration_packages
 
   pack:
     - build
