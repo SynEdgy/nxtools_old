@@ -18,7 +18,7 @@ class nxLocalUser
     [int]    $UserId
     [int]    $GroupId
 
-    hidden [string] $UserInfo
+    hidden [string] $UserInfo # GECOS field
     [string] $FullName
     [string] $Office
     [string] $OfficePhone

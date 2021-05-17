@@ -239,37 +239,51 @@ class nxUser
 
                 # Get user so we can set other properties
                 $localUser = Get-nxLocalUser -UserName $this.UserName -ErrorAction Stop
+                $setUserParams = @{}
 
                 switch -Regex ($currentState.Reasons.Code)
                 {
                     ':FullName$'
                     {
-
+                        $setUserParams['FullName'] = $this.FullName
                     }
 
                     ':Description$'
                     {
-
+                        $setUserParams['Description'] = $this.Description
                     }
 
                     ':Password$'
                     {
-
-                    }
-
-                    ':Disabled$'
-                    {
-
+                        $setUserParams['EncryptedPassword'] = $this.Password
                     }
 
                     ':HomeDirectory$'
                     {
-
+                        $setUserParams['HomeDirectory'] = $this.HomeDirectory
                     }
 
                     ':GroupID$'
                     {
                         Write-Verbose -Message ('Forcing the PrimaryGroup to be ID {0}' -f  $this.GroupID)
+                        $setUserParams['GroupID'] = $this.GroupID
+                    }
+                }
+
+                if ($setUserParams.Keys.Count -gt 0)
+                {
+                    Set-nxLocalUser @setUserParams
+                }
+
+                if ('nxUser:nxUser:Disabled' -in $currentState.Reasons.Code)
+                {
+                    if ($true -eq $this.Disabled)
+                    {
+                        Disable-nxLocalUser -UserName $this.UserName
+                    }
+                    elseif ($false -eq $this.Disabled)
+                    {
+                        Enable-nxLocalUser -UserName $this.UserName
                     }
                 }
             }
@@ -279,6 +293,11 @@ class nxUser
             {
                 Write-Verbose -Message "Disabling user account '$($this.UserName)'."
                 Disable-nxLocalUser -UserName $localUser.UserName
+            }
+            elseif ($false -eq $this.Disabled -and $localUser.IsDisabled())
+            {
+                Write-Verbose -Message "Enabling user account '$($this.UserName)'."
+                Enable-nxLocalUser -UserName $localUser.UserName
             }
 
             Write-Verbose -Message (

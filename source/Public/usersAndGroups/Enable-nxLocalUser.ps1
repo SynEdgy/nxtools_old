@@ -1,7 +1,7 @@
-function Disable-nxLocalUser
+function Enable-nxLocalUser
 {
     [CmdletBinding(SupportsShouldProcess = $true)]
-    [outputType([nxLocalUser])]
+    [OutputType()]
     param
     (
         [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, Position = 0)]
@@ -9,16 +9,13 @@ function Disable-nxLocalUser
         $UserName,
 
         [Parameter(ValueFromPipelineByPropertyName = $true)]
-        [switch]
-        $LockOnly,
+        [ValidateSet([ValidShell],ErrorMessage="Value '{0}' is invalid. Try one of: {1}")]
+        [String]
+        $ShellCommand,
 
         [Parameter(ValueFromPipelineByPropertyName = $true)]
-        [switch]
-        $SkipNologinShell,
-
-        [Parameter(ValueFromPipelineByPropertyName = $true)]
-        [switch]
-        $DoNotExpireAccount,
+        [datetime]
+        $ExpireOn,
 
         [Parameter(ValueFromPipelineByPropertyName = $true)]
         [switch]
@@ -37,46 +34,31 @@ function Disable-nxLocalUser
             $usermodParams = @()
 
             # at the very least, we lock the account (does not impact ssh pub keys or PAM except pam_unix)
-            $usermodParams += @('-L')
+            $usermodParams += @('-U')
 
-            if (-not $SkipNologinShell)
+            if ($PSBoundParameters.ContainsKey('ShellCommand'))
             {
-                $usermodParams += @('-s','/sbin/nologin')
+                $usermodParams += @('-s', $ShellCommand)
+            }
+
+            if ($PSBoundParameters.ContainsKey('ExpireOn') -and $PSBoundParameters['ExpireOn'])
+            {
+                $usermodParams += @('-e', $ExpireOn.ToString('yyyy-MM-dd'))
             }
 
             $usermodParams += @($UserNameItem)
 
-            if (-not $LockOnly.IsPresent -and -not $DoNotExpireAccount.IsPresent)
-            {
-                $chageParams = @('-E0',$UserNameItem)
-                $ShouldProcessMessage = "Disabling account '$UserNameItem': 'usermod $(($usermodParams -join ' ')) && chage $(($chageParams -join ' '))'."
-            }
-            else
-            {
-                $ShouldProcessMessage = "Locking account '$UserNameItem': 'usermod $(($usermodParams -join ' '))'."
-            }
-
             if ($PSCmdlet.ShouldProcess(
-                    $ShouldProcessMessage,
+                    "Performing the unix command 'usermod $(($usermodParams -join ' '))'.",
                     "$UserNameItem",
-                    "Disabling account '$UserNameItem'."
+                    "Enabling account '$UserNameItem'."
                 )
             )
             {
-
                 Invoke-NativeCommand -Executable 'usermod' -Parameters $usermodParams -Verbose:$verbose -ErrorAction 'Stop' |
                     ForEach-Object -Process {
                         throw $_
                     }
-
-                if (-not $LockOnly.IsPresent -and -not $DoNotExpireAccount.IsPresent)
-                {
-                    Invoke-NativeCommand -Executable 'chage' -Parameters $chageParams -Verbose:$verbose -ErrorAction 'Stop' |
-                        ForEach-Object -Process {
-                            throw $_
-                        }
-                }
-
 
                 if ($PassThru.IsPresent)
                 {
