@@ -238,7 +238,7 @@ class nxFile
                         Code = '{0}:{0}:Type' -f $this.GetType()
                         Phrase = $script:localizedDataNxFile.TypeMismatch -f $this.DestinationPath, $this.Type, $currentState.Type
                     }
-                    Break # If the type is wrong, we can't recover from this.
+                    break # If the type is wrong, we can't recover from this.
                 }
 
                 'Contents'

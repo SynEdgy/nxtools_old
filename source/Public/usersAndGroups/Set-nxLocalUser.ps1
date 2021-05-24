@@ -2,6 +2,7 @@ function Set-nxLocalUser
 {
     [CmdletBinding(DefaultParameterSetName = 'ParameterizedGECOSAddGroupExpireOn', SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingUsernameAndPasswordParams', '')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', '')]
     param
     (
 
