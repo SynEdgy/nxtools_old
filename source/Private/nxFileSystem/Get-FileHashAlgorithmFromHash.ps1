@@ -32,7 +32,7 @@ function Get-FileHashAlgorithmFromHash
             'SHA512'
         }
 
-        Default
+        default
         {
             throw ('Could not resolve the Algorith used for hash ''{0}''' -f $FileHash)
         }
