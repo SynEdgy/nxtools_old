@@ -15,6 +15,7 @@ Encoding: UTF8
 # suffix: suffix.ps1
 prefix: prefix.ps1
 VersionedOutputDirectory: true
+BuiltModuleSubdirectory: module
 
 ####################################################
 #      ModuleBuilder Submodules Configuration      #
