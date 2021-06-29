@@ -34,7 +34,7 @@ class GC_msid232
     [GC_msid232] Get()
     {
         $userAccountWithoutPassword = Get-nxLocalUser | Where-Object -FilterScript {
-            $null -eq $_.etcShadow.Encryptedpassword
+            [string]::IsNullOrEmpty($_.etcShadow.Encryptedpassword)
         } #| select username,password,@{N='pass';E={$_.etcShadow.EncryptedPassword}}
 
         $result = [GC_msid232]::new()
