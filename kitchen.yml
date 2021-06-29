@@ -25,7 +25,7 @@ driver:
 
 provisioner:
   name: shell # defaults to bash on linux, so the shebang is important!
-  script: 'tests/integration/provisioning.ps1'
+  script: 'tests/kitchen/provisioning.ps1'
 
 verifier:
   sudo: true

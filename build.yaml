@@ -53,6 +53,12 @@ BuildWorkflow:
     - Clean
     - build
     - build_guestconfiguration_packages
+    - cleanUnzippedGCPackages
+
+  cleanUnzippedGCPackages: |
+    {
+      Get-ChildItem 'output\GCPolicyPackages\' -Directory | Remove-Item -Recurse -Force
+    }
 
   pack:
     - build

@@ -42,11 +42,11 @@ class GC_msid110
         $result = [GC_msid110]::new()
         $result.Name = $this.Name
 
-        if ($sshdContentMatch)
+        if (-not $sshdContentMatch)
         {
             $result.Reasons += [Reason]@{
                 Code = '{0}:{0}:sshdPermitEmptyPasswords' -f $this.GetType()
-                Phrase = 'Remote connections from accounts with empty passwords is Enabled.'
+                Phrase = 'Remote connections from accounts with empty passwords is not disabled.'
             }
         }
 
