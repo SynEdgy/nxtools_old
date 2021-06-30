@@ -53,5 +53,4 @@ function Get-nxYumPackageInstalled
                 }
             }
     }
-
 }
