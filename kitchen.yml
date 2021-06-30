@@ -31,7 +31,7 @@ verifier:
   sudo: true
   shell: pwsh-preview
   name: pester
-  test_folder: ./tests/kitchen/kitchenTest1/
+  test_folder: ./tests/kitchen/
   copy_folders:
     - output/module/nxtools
   downloads:
@@ -64,6 +64,32 @@ platforms:
           sudo apt-get install -y powershell-preview
           sudo apt-get install -y tree
           sudo pwsh-preview -c "enable-ExperimentalFeature -Name PSSubsystemPluginModel"
+
+  # - name: centos-7.5
+  #   driver:
+  #     image_urn: OpenLogic:CentOS:7.5:latest
+  #     username: azure
+  #     password: <%=
+  #         require "securerandom"
+  #         if File.exists?("./.kitchen/pwd.txt")
+  #           ENV['MACHINE_PASS'] = File.read("./.kitchen/pwd.txt")
+  #         else
+  #           ENV['MACHINE_PASS'] = SecureRandom.base64(24)
+  #           File.open("./.kitchen/pwd.txt", "w") { |f| f.write ENV['MACHINE_PASS'] }
+  #         end
+  #         ENV['MACHINE_PASS']
+  #       %>
+  #   lifecycle:
+  #     post_create:
+  #     - remote: echo "<%= ENV['MACHINE_PASS'] %>" | sudo -S chmod +x /etc/sudoers.d
+  #     - remote: "echo \"<%= ENV['MACHINE_PASS'] %>\" | sudo -S sh -c \"chmod +x /etc/sudoers.d && echo 'azure ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/waagent\""
+  #     - remote: |
+  #         # Register the Microsoft RedHat repository
+  #         curl https://packages.microsoft.com/config/rhel/7/prod.repo | sudo tee /etc/yum.repos.d/microsoft.repo
+  #         # Install PowerShell-preview
+  #         sudo yum install -y powershell-preview
+  #         # Start PowerShell-preview to enable exp feature
+  #         sudo pwsh-preview -c "enable-ExperimentalFeature -Name PSSubsystemPluginModel"
 
   # - name: Debian-9
   #   driver:
