@@ -64,6 +64,7 @@ stages:
             displayName: 'Build & Package Module'
             inputs:
               pwsh: true
+              targetType: inline
               continueOnError: true
               script: |
                 pwsh-preview -c {
