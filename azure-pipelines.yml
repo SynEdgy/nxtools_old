@@ -76,6 +76,7 @@ stages:
                 }
 
                 pwsh-preview -c {
+                  Import-Module -Name PSDesiredStateConfiguration -PassThru
                   ./build.ps1 -tasks pack
                 }
             env:
