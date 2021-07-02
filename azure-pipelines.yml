@@ -47,7 +47,7 @@ stages:
                 # Install PowerShell
                 sudo apt-get install -y powershell-preview
                 pwsh-preview -c 'Enable-ExperimentalFeature -Name PSSubsystemPluginModel'
-                pwsh-preview -c 'Install-Module -Name PSDesiredStateConfiguration -AllowPrerelease -Confirm:$false'
+                pwsh-preview -c 'Install-Module -Name PSDesiredStateConfiguration -AllowPrerelease -Force'
 
           - task: gitversion/setup@0
             displayName: Install GitVersion
