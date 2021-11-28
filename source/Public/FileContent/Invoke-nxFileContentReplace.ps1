@@ -21,6 +21,10 @@ function Invoke-nxFileContentReplace
         $CaseSensitive,
 
         [Parameter()]
+        [switch]
+        $Multiline,
+
+        [Parameter()]
         [String]
         $Encoding = 'UTF8'
     )
@@ -36,6 +40,11 @@ function Invoke-nxFileContentReplace
     $setContentParams = $getContentsParams.Clone()
     $setContentParams['Path'] = $tempFile
     [int]$lineNumber = -1 #start at -1 so that as soon as you increment it goes to 0 (the first line).
+
+    if ($Multiline.IsPresent)
+    {
+        $getContentsParams['Raw'] = $true
+    }
 
     Get-Content @getContentsParams | ForEach-Object -Process { # Stream
         $lineNumber++

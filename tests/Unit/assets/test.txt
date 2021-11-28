@@ -4,5 +4,6 @@ pretty easy and simple.
 utf8
 Yeah boy
 
-utf8 stuff
+utf8
+Yeah stuff
 Maybe we should stream a file content to a temp file, then set content of temp file back to file.

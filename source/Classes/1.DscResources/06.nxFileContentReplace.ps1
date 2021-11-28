@@ -11,6 +11,9 @@ class nxFileContentReplace
     [string] $EnsureExpectedPattern
 
     [DscProperty()] # WriteOnly
+    [bool] $Multiline = $false  # Will read the whole file and -match/-replace the whole content
+
+    [DscProperty()] # WriteOnly
     [string] $SearchPattern
 
     [DscProperty()] # WriteOnly
@@ -35,6 +38,7 @@ class nxFileContentReplace
         $currentState.SimpleMatch = $this.SimpleMatch
         $currentState.ReplacementString = $this.ReplacementString
         $currentState.CaseSensitive = $this.CaseSensitive
+        $currentState.Multiline = $this.Multiline
 
         if (-not (Test-Path -Path $this.FilePath -ErrorAction Ignore))
         {
@@ -65,14 +69,28 @@ class nxFileContentReplace
             $ExpectedPattern = $this.EnsureExpectedPattern
         }
 
-        $selectStringParams = @{
-            Path = $this.FilePath
-            Pattern = $ExpectedPattern
-            AllMatches = $true
-            CaseSensitive = $this.CaseSensitive
+        if ($this.Multiline)
+        {
+            $selectStringParams = @{
+                Pattern = $ExpectedPattern
+                AllMatches = $true
+                CaseSensitive = $this.CaseSensitive
+            }
+
+            $foundMatches = Get-Content -Raw -Path $this.FilePath | Select-String @selectStringParams
+        }
+        else
+        {
+            $selectStringParams = @{
+                Path = $this.FilePath
+                Pattern = $ExpectedPattern
+                AllMatches = $true
+                CaseSensitive = $this.CaseSensitive
+            }
+
+            $foundMatches = Select-String @selectStringParams
         }
 
-        $foundMatches = Select-String @selectStringParams
         if ($foundMatches.count -gt 0)
         {
             $currentState.Ensure = [Ensure]::Present
@@ -101,14 +119,30 @@ class nxFileContentReplace
                 }
             }
 
-            # List all of the transforms that we want to happen.
-            # Re-use the sls params but now use the SearchPattern for pattern.
-            $selectStringParams['Pattern'] = $this.SearchPattern
-            $foundReplace = Select-String @selectStringParams
-            $foundReplace.Foreach{
-                $currentState.Reasons += [Reason]@{
-                    Code   = '{0}:{0}:SubstitubtionRequired' -f $this.GetType()
-                    Phrase = 'Pattern ''{0}'' found at line {1} to be replaced with ''{2}'' of file ''{3}'' resulting in: ''.' -f $_.Pattern, $_.LineNumber, $this.ReplacementString, $CurrentState.FilePath
+            if (-not $this.Multiline)
+            {
+                # List all of the transforms that we want to happen.
+                # Re-use the sls params but now use the SearchPattern for pattern.
+                $selectStringParams['Pattern'] = $this.SearchPattern
+                $foundReplace = Select-String @selectStringParams
+                $foundReplace.Foreach{
+                    $currentState.Reasons += [Reason]@{
+                        Code   = '{0}:{0}:SubstitubtionRequired' -f $this.GetType()
+                        Phrase = 'Pattern ''{0}'' found at line {1} to be replaced with ''{2}'' of file ''{3}'' resulting in: ''.' -f $_.Pattern, $_.LineNumber, $this.ReplacementString, $CurrentState.FilePath
+                    }
+                }
+            }
+            else
+            {
+                # List all of the transforms that we want to happen on the whole file.
+                # Re-use the sls params but now use the SearchPattern for pattern.
+                $selectStringParams['Pattern'] = $this.SearchPattern
+                $foundReplace = Get-Content -Raw -Path $this.FilePath | Select-String @selectStringParams
+                $foundReplace.Matches.Foreach{
+                    $currentState.Reasons += [Reason]@{
+                        Code   = '{0}:{0}:MultilineSubstitubtionRequired' -f $this.GetType()
+                        Phrase = 'Pattern ''{0}'' found at index {1} of length ''{2}'' to be replaced with ''{3}'' of file ''{4}'' resulting in: ''.' -f $foundReplace.Pattern, $_.Index, $_.Length, $this.ReplacementString, $CurrentState.FilePath
+                    }
                 }
             }
         }
@@ -134,7 +168,7 @@ class nxFileContentReplace
         if ($this.Ensure -ne $currentState.Ensure)
         {
             # Do the substitutions
-            Invoke-nxFileContentReplace -Path $this.FilePath -SearchPattern $this.SearchPattern -ReplaceWith $this.ReplacementString
+            Invoke-nxFileContentReplace -Path $this.FilePath -SearchPattern $this.SearchPattern -ReplaceWith $this.ReplacementString -Multiline:$this.Multiline
         }
     }
 }
