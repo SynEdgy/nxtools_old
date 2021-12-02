@@ -57,7 +57,7 @@ BuildWorkflow:
 
   cleanUnzippedGCPackages: |
     {
-      Get-ChildItem 'output\GCPolicyPackages\' -Directory | Remove-Item -Recurse -Force
+      Get-ChildItem 'output\GCPackages\' -Directory | Remove-Item -Recurse -Force
     }
 
   pack:

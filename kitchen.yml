@@ -29,7 +29,7 @@ provisioner:
 
 verifier:
   sudo: true
-  shell: pwsh-preview
+  shell: pwsh
   name: pester
   test_folder: ./tests/kitchen/
   copy_folders:
@@ -61,9 +61,9 @@ platforms:
           # Update the list of packages after we added packages.microsoft.com
           sudo apt-get update
           # Install PowerShell
-          sudo apt-get install -y powershell-preview
+          sudo apt-get install -y powershell
           sudo apt-get install -y tree
-          sudo pwsh-preview -c "enable-ExperimentalFeature -Name PSSubsystemPluginModel"
+          sudo pwsh -c "enable-ExperimentalFeature -Name PSSubsystemPluginModel"
 
   # - name: centos-7.5
   #   driver:
@@ -138,7 +138,7 @@ suites:
   - name: GCPackages
     verifier:
       copy_folders:
-        - output/GCPolicyPackages/
+        - output/GCPackages/
         - output/module/nxtools
       install_modules:
         - Name: GuestConfiguration
