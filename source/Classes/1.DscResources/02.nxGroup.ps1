@@ -173,6 +173,7 @@ class nxGroup
                 $newNxLocalGroupParams = @{
                     GroupName = $this.GroupName
                     PassThru = $true
+                    Confirm = $false
                 }
 
                 if ($this.PreferredGroupID)
