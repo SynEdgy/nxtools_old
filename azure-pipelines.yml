@@ -97,8 +97,14 @@ stages:
               pwsh: true
               targetType: inline
               script: |
-                Import-Module -Name PSDesiredStateConfiguration -PassThru
-                ./build.ps1 -tasks hqrmtest
+                pwsh -c 'Enable-ExperimentalFeature -Name PSSubsystemPluginModel'
+                pwsh -c 'Install-Module -Name PSDesiredStateConfiguration -Force'
+                pwsh -c 'ipmo PSDesiredStateConfiguration; Enable-ExperimentalFeature -Name PSDesiredStateConfiguration.InvokeDscResource -ErrorAction SilentlyContinue'
+
+                pwsh -c {
+                  Import-Module -Name PSDesiredStateConfiguration -PassThru
+                  ./build.ps1 -tasks hqrmtest
+                }
 
           - task: PublishTestResults@2
             displayName: 'Publish Test Results'
