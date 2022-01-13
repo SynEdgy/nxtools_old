@@ -1,4 +1,4 @@
-Enum nxFileLineAddMode
+enum nxFileLineAddMode
 {
     Append
     AfterLinePatternMatch
