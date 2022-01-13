@@ -110,9 +110,14 @@ stages:
             name: test
             displayName: 'Run HQRM Test'
             inputs:
-              filePath: './build.ps1'
-              arguments: '-Tasks hqrmtest'
-              pwsh: false
+              pwsh: true
+              targetType: inline
+              script: |
+                pwsh-preview -c {
+                    Import-Module -Name PSDesiredStateConfiguration -PassThru
+                    ./build.ps1 -tasks hqrmtest
+                  }
+
           - task: PublishTestResults@2
             displayName: 'Publish Test Results'
             condition: succeededOrFailed()
