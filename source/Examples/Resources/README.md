@@ -20,8 +20,8 @@ To emulate arrays of strings or int, the GC Resource author should use a value s
 
 These are the links to the examples for each individual resource.
 
-- [nxFile](Resources/nxFile)
-- [nxGroup](Resources/nxGroup)
-- [nxUser](Resources/nxUser)
-- [nxFileLine](Resources/nxFileLine)
-- [nxFileContentReplace](Resources/nxFileContentReplace)
+- [nxFile](Resources/nxFile/)
+- [nxGroup](Resources/nxGroup/)
+- [nxUser](Resources/nxUser/)
+- [nxFileLine](Resources/nxFileLine/)
+- [nxFileContentReplace](Resources/nxFileContentReplace/)

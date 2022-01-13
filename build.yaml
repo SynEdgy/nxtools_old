@@ -92,6 +92,7 @@ DscTest:
         Tag:
         ExcludeTag:
           - Common Tests - New Error-Level Script Analyzer Rules
+          # - Common Tests - Validate Example Files
       Output:
         Verbosity: Detailed
   Script:
