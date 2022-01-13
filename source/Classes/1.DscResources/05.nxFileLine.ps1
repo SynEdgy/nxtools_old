@@ -51,8 +51,8 @@ class nxFileLine
         {
             $allFiles = Get-Item -Path $this.FilePath
             $currentState.Reasons = [Reason]@{
-                Code   = '{0}:{0}:ResolvedToMultipledFiles' -f $this.GetType()
-                Phrase = "The Path '$($this.filePath)' resolved to multiple paths: ['$($allFiles -join "','")']."
+                Code   = '{0}:{0}:ResolvedToMultipleFiles' -f $this.GetType()
+                Phrase = "The Path '$($this.FilePath)' resolved to multiple paths: ['$($allFiles -join "','")']."
             }
 
             return $currentState
@@ -83,7 +83,7 @@ class nxFileLine
 
         if (-not [string]::IsNullOrEmpty($this.DoesNotContainPattern))
         {
-            $shouldNotFindPattern = Select-String -Path $this.Path -Pattern $this.DoesNotContainPattern -AllMatches -CaseSensitive:$this.CaseSensitive
+            $shouldNotFindPattern = Select-String -Path $this.FilePath -Pattern $this.DoesNotContainPattern -AllMatches -CaseSensitive:$this.CaseSensitive
             $currentState.Reasons += $shouldNotFindPattern.Foreach{
                 [Reason]@{
                     Code   = '{0}:{0}:LineUnexpected' -f $this.GetType()
@@ -107,6 +107,13 @@ class nxFileLine
 
     [void] Set()
     {
+        $file = Get-nxChildItem -Path $this.FilePath -File
+
+        if (-not $file)
+        {
+            Write-Warning -Message "The file '$($this.FilePath)' was not found. Please create the file with [nxFile] to manage its content with [nxFileLine]."
+        }
+
         if (-not ([string]::IsNullOrEmpty($this.ContainsLine)))
         {
             $foundLines = Select-String -Path $this.FilePath -Pattern $this.ContainsLine -SimpleMatch -AllMatches -CaseSensitive:$this.CaseSensitive
@@ -119,7 +126,7 @@ class nxFileLine
 
         if (-not [string]::IsNullOrEmpty($this.DoesNotContainPattern))
         {
-            $shouldNotFindPattern = Select-String -Path $this.Path -Pattern $this.DoesNotContainPattern -AllMatches -CaseSensitive:$this.CaseSensitive
+            $shouldNotFindPattern = Select-String -Path $this.FilePath -Pattern $this.DoesNotContainPattern -AllMatches -CaseSensitive:$this.CaseSensitive
 
             if ($shouldNotFindPattern.count -gt 0)
             {

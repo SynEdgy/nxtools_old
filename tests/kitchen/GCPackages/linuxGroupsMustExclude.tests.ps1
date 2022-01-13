@@ -5,7 +5,7 @@ BeforeAll {
     $packageZipPath = Join-Path -Path $ModulePath -ChildPath 'GCPackages/LinuxGroupsMustExclude*.zip'
     $packageZip = Get-Item -Path $packageZipPath -errorAction SilentlyContinue
 }
-Describe 'Test LinuxGroupsMustExcludt Audit Package' {
+Describe 'Test LinuxGroupsMustExclude Package' {
     it 'Package should be available' {
 
         Test-Path -Path $packageZip | Should -be $true -because (gci (split-path -parent $packageZipPath))
@@ -62,7 +62,12 @@ Describe 'Test LinuxGroupsMustExcludt Audit Package' {
     it 'finds the the group ''foobar'' not compliant when we add root & test users.' {
         if (-not (Get-nxLocalGroup -GroupName 'foobar'))
         {
-            New-nxLocalGroup -GroupName foobar -ErrorAction SilentlyContinue -Confirm:$false
+            New-nxLocalGroup -GroupName 'foobar' -ErrorAction SilentlyContinue -Confirm:$false
+        }
+
+        if (-not (Get-nxLocalUser -UserName 'test'))
+        {
+            New-nxLocalUser -UserName 'test' -Confirm:$false -ErrorAction 'SilentlyContinue'
         }
 
         Add-nxLocalGroupMember -GroupName 'foobar' -UserName 'root','test'
@@ -74,9 +79,9 @@ Describe 'Test LinuxGroupsMustExcludt Audit Package' {
         $result.Resources.Properties.Reasons | Should -not -BeNullOrEmpty
     }
 
-    it 'Remediates the LinuxGroupsMustInclude package by creating the group ''foobar'' with no params' -skip { # Skipping because package is not yet set as AuditAndSet
-        Start-GuestConfigurationPackageRemediation -Path $packageZip
-        $result = Get-GuestConfigurationPackageComplianceStatus -Path $packageZip -verbose
+    it 'Remediates the LinuxGroupsMustExclude package by creating the group ''foobar'' with no params' { # Skipping because package is not yet set as AuditAndSet
+        Start-GuestConfigurationPackageRemediation -Path $packageZip -Verbose -WarningAction SilentlyContinue
+        $result = Get-GuestConfigurationPackageComplianceStatus -Path $packageZip
         $result.ComplianceStatus | Should -be $true
     }
 }

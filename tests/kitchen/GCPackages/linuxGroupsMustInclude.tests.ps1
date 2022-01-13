@@ -82,7 +82,7 @@ Describe 'Test Groups Must Include GC Package' {
         $result.Resources.Properties.Reasons | Should -BeNullOrEmpty
     }
 
-    it 'Remediates the LinuxGroupsMustInclude package by creating the group ''foobar'' with no params' -skip { # Skipping because package is not yet set as AuditAndSet
+    it 'Remediates the LinuxGroupsMustInclude package by creating the group ''foobar'' with no params' { # Skipping because package is not yet set as AuditAndSet
         Start-GuestConfigurationPackageRemediation -Path $packageZip
         $result = Get-GuestConfigurationPackageComplianceStatus -Path $packageZip -verbose
         $result.ComplianceStatus | Should -be $true

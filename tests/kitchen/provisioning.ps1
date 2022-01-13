@@ -1,5 +1,8 @@
 #!/usr/bin/env pwsh
 
+
+$ProgressPreference = 'SilentlyContinue'
+
 if ((Get-PSRepository -Name PSGallery).InstallationPolicy -ne 'Trusted')
 {
     Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
