@@ -25,3 +25,4 @@ These are the links to the examples for each individual resource.
 - [nxUser](./Resources/nxUser/)
 - [nxFileLine](./Resources/nxFileLine/)
 - [nxFileContentReplace](./Resources/nxFileContentReplace/)
+source\Examples\Resources\nxUser
